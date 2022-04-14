@@ -86,3 +86,7 @@ def launch(resf):
     resf.write("accu avec 50 epochs : 0.5838\n")
     resf.write(f"{name} 200 epochs acc : {a}\n")
     # fitted432ep150.model acc : 0.6616
+    
+resf = open("result.txt", 'w')
+launch(resf)
+resf.close()
