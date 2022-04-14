@@ -78,9 +78,9 @@ def create_model_431_best_regu():
 def launch(resf):
     # save the best found for now
     model_name = 'cks:3,cp:same,cki:RandomNormal,cbi:RandomNormal, mp:same,dki:GlorotNormal,dbi:RandomNormal,dkr:l2_4,dbr:l1_4'
-    name = 'fitted432ep200b.model'
+    name = 'fitted432ep200c.model'
     model1 = create_model_431_best_regu()
-    model1.fit(x_train, y_train, batch_size=128, epochs=200)
+    model1.fit(x_train, y_train, batch_size=128, epochs=300)
     a = round(model1.evaluate(x_valid, y_valid)[1], 4)
     model1.save('models/' + name, save_format='h5')
     resf.write("model de type "+model_name+"\n")
