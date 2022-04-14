@@ -59,17 +59,17 @@ def create_model_431_best_regu():
     model = keras.Sequential()
     model.add(keras.Input(shape=(32,32,3)))
 
-    model.add(keras.layers.Conv2D(16, 3,padding = 'same', activation='relu', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
-    model.add(keras.layers.MaxPooling2D((2,2),padding = 'same'))
-    model.add(keras.layers.Conv2D(32, 3,padding = 'same', activation='relu', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
-    model.add(keras.layers.MaxPooling2D((2,2),padding = 'same'))
-    model.add(keras.layers.Conv2D(64, 3,padding = 'same', activation='relu', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
-    model.add(keras.layers.MaxPooling2D((2,2),padding = 'same'))
+    model.add(keras.layers.Conv2D(16, 3, padding='same', activation='relu', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
+    model.add(keras.layers.MaxPooling2D((2,2), padding='same'))
+    model.add(keras.layers.Conv2D(32, 3, padding='same', activation='relu', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
+    model.add(keras.layers.MaxPooling2D((2,2), padding='same'))
+    model.add(keras.layers.Conv2D(64, 3, padding='same', activation='relu', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
+    model.add(keras.layers.MaxPooling2D((2,2), padding='same'))
     model.add(keras.layers.Flatten())
 
-    model.add(keras.layers.Dense(32,activation = 'relu', kernel_initializer='GlorotNormal', bias_initializer='RandomNormal',kernel_regularizer = 'l1', bias_regularizer = 'l2'))
+    model.add(keras.layers.Dense(32, activation='relu', kernel_initializer='GlorotNormal', bias_initializer='RandomNormal',kernel_regularizer = keras.regularizers.l2(1e-4), bias_regularizer = keras.regularizers.l1(1e-4)))
 
-    model.add(keras.layers.Dense(10,activation = 'softmax', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
+    model.add(keras.layers.Dense(10, activation='softmax', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), loss='categorical_crossentropy',metrics='accuracy')
 
@@ -77,16 +77,17 @@ def create_model_431_best_regu():
 
 def launch(resf):
     # save the best found for now
-    name = 'fitted432ep200.model'
+    model_name = 'cks:3,cp:same,cki:RandomNormal,cbi:RandomNormal, mp:same,dki:GlorotNormal,dbi:RandomNormal,dkr:l2_4,dbr:l1_4'
+    name = 'fitted432ep200b.model'
     model1 = create_model_431_best_regu()
     model1.fit(x_train, y_train, batch_size=128, epochs=200)
     a = round(model1.evaluate(x_valid, y_valid)[1], 4)
     model1.save('models/' + name, save_format='h5')
-    resf.write("model de type cks:3,cp:same,cki:RandomNormal,cbi:RandomNormal, mp:same,dki:GlorotNormal,dbi:RandomNormal,dkr:l1,dbr:l2\n")
-    resf.write("accu avec 50 epochs : 0.5838\n")
+    resf.write("model de type "+model_name+"\n")
+    resf.write("accu avec 50 epochs : ?\n")
     resf.write(f"{name} 200 epochs acc : {a}\n")
     # fitted432ep150.model acc : 0.6616
-    
+
 resf = open("result.txt", 'w')
 launch(resf)
 resf.close()
