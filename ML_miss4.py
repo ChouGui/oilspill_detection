@@ -10,6 +10,7 @@ from scipy import stats
 '''
 import tensorflow as tf
 from tensorflow import keras
+from keras.callbacks import CSVLogger
 
 ((x_train, y_train), (x_valid, y_valid)) = keras.datasets.cifar10.load_data()
 y_train = keras.utils.to_categorical(y_train)
@@ -79,8 +80,9 @@ def launch(resf):
     # save the best found for now
     model_name = 'cks:3,cp:same,cki:RandomNormal,cbi:RandomNormal, mp:same,dki:GlorotNormal,dbi:RandomNormal,dkr:l2_4,dbr:l1_4'
     name = 'fitted432ep200c.model'
+    csv_logger = CSVLogger('log.csv', append=True, separator=';')
     model1 = create_model_431_best_regu()
-    model1.fit(x_train, y_train, batch_size=128, epochs=300)
+    model1.fit(x_train, y_train, batch_size=128, epochs=2,verbose=2,callbacks=[csv_logger])
     a = round(model1.evaluate(x_valid, y_valid)[1], 4)
     model1.save('models/' + name, save_format='h5')
     resf.write("model de type "+model_name+"\n")
