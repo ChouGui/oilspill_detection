@@ -68,7 +68,8 @@ def create_model_431_best_regu():
     model.add(keras.layers.MaxPooling2D((2,2), padding='same'))
     model.add(keras.layers.Flatten())
 
-    model.add(keras.layers.Dense(32, activation='relu', kernel_initializer='GlorotNormal', bias_initializer='RandomNormal',kernel_regularizer = keras.regularizers.l2(1e-4), bias_regularizer = keras.regularizers.l1(1e-4)))
+    #model.add(keras.layers.Dense(32, activation='relu', kernel_initializer='GlorotNormal', bias_initializer='RandomNormal',kernel_regularizer = keras.regularizers.l2(1e-4), bias_regularizer = keras.regularizers.l1(1e-4)))
+    model.add(keras.layers.Dense(32, activation='relu', kernel_initializer='GlorotNormal', bias_initializer='RandomNormal',kernel_regularizer = 'l2', bias_regularizer = keras.regularizers.l1_l2()))
 
     model.add(keras.layers.Dense(10, activation='softmax', kernel_initializer='RandomNormal', bias_initializer='RandomNormal'))
 
@@ -78,15 +79,35 @@ def create_model_431_best_regu():
 
 def launch(resf):
     # save the best found for now
-    model_name = 'cks:3,cp:same,cki:RandomNormal,cbi:RandomNormal, mp:same,dki:GlorotNormal,dbi:RandomNormal,dkr:l2_4,dbr:l1_4'
-    name = 'fitted432ep200c.model'
+    model_name = 'cks:3,cp:same,cki:RandomNormal,cbi:RandomNormal, mp:same,dki:GlorotNormal,dbi:RandomNormal,dkr:l2,dbr:l1_l2'
+    name = 'fitted432d.model'
     csv_logger = CSVLogger('log.csv', append=True, separator=';')
     model1 = create_model_431_best_regu()
-    model1.fit(x_train, y_train, batch_size=128, epochs=2,verbose=2,callbacks=[csv_logger])
+    model1.fit(x_train, y_train, batch_size=128, epochs=50,verbose=2,callbacks=[csv_logger])
     a = round(model1.evaluate(x_valid, y_valid)[1], 4)
-    model1.save('models/' + name, save_format='h5')
+    model1.save('models/ep50' + name, save_format='h5')
     resf.write("model de type "+model_name+"\n")
-    resf.write("accu avec 50 epochs : ?\n")
+    resf.write(f"{name} 50 epochs acc : {a}\n")
+
+    model1 = create_model_431_best_regu()
+    model1.fit(x_train, y_train, batch_size=128, epochs=100, verbose=2, callbacks=[csv_logger])
+    a = round(model1.evaluate(x_valid, y_valid)[1], 4)
+    model1.save('models/ep100' + name, save_format='h5')
+    resf.write("model de type " + model_name + "\n")
+    resf.write(f"{name} 100 epochs acc : {a}\n")
+
+    model1 = create_model_431_best_regu()
+    model1.fit(x_train, y_train, batch_size=128, epochs=150, verbose=2, callbacks=[csv_logger])
+    a = round(model1.evaluate(x_valid, y_valid)[1], 4)
+    model1.save('models/ep150' + name, save_format='h5')
+    resf.write("model de type " + model_name + "\n")
+    resf.write(f"{name} 150 epochs acc : {a}\n")
+
+    model1 = create_model_431_best_regu()
+    model1.fit(x_train, y_train, batch_size=128, epochs=200, verbose=2, callbacks=[csv_logger])
+    a = round(model1.evaluate(x_valid, y_valid)[1], 4)
+    model1.save('models/ep200' + name, save_format='h5')
+    resf.write("model de type " + model_name + "\n")
     resf.write(f"{name} 200 epochs acc : {a}\n")
     # fitted432ep150.model acc : 0.6616
 
