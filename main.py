@@ -13,6 +13,7 @@ import time
 # from pathlib import Path
 # import matplotlib.pyplot as plt
 import train
+import eval
 
 
 # The main entry point for this module
@@ -20,10 +21,14 @@ def main():
     t1 = time.perf_counter()
     resf = open("result.txt", 'w')
     # Train a model
-    model_name = train.train(resf, sys.argv[1])
+    context = sys.argv[1]
+    model_name = train.train(resf, context)
     t2 = time.perf_counter()
     resf.write(f"model name : {model_name}")
     resf.write(str(f"train computation time {t2 - t1:0.4f} seconds"))
+    print("training done, launching evaluation :")
+    eval.evaluateB(resf,context, model_name)
+    print("evaluation done")
     resf.close()
 
 
