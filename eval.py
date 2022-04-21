@@ -13,9 +13,9 @@ from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activati
 from tensorflow.keras import optimizers
 from tensorflow.keras.applications import VGG19
 
-from PIL import Image
+#from PIL import Image
 from pathlib import Path
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 # Evaluate the model
@@ -38,9 +38,9 @@ def evaluateB(resf, context="bajoo", model_name = None):
         validation_samples = 10  # 10 categories with 1000 images in each category
     # Load the model
     if model_name == None :
-        model = keras.models.load_model(models_path+'VGG19_ep3_bs64_ts5000_vs250.h5')
+        model = keras.models.load_model(str(models_path)+'VGG19_ep3_bs64_ts5000_vs250.h5')
     else :
-        model = keras.models.load_model(models_path+model_name)
+        model = keras.models.load_model(str(models_path)+model_name)
     # Load classes
     # classes = {}
     # with open('models/classes.pkl', 'rb') as file:

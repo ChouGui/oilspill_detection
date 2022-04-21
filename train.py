@@ -15,7 +15,7 @@ from tensorflow.keras.applications import VGG19
 
 from PIL import Image
 from pathlib import Path
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 # Train a model
@@ -24,8 +24,8 @@ def train(resf, context="bajoo"):
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
         models_path = Path("/linux/glegat/code/oilspill/models")
-        epochs = 2
-        batch_size = 128
+        epochs = 1
+        batch_size = 500
         train_samples = 1000  # 2 categories with 5000 images
         validation_samples = 500  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
@@ -98,7 +98,7 @@ def train(resf, context="bajoo"):
     # Save model to disk
     model_name = 'VGG19_ep' + str(epochs) + '_bs' + str(batch_size) + '_ts' + str(train_samples) + '_vs' + str(
         validation_samples) + '.h5'
-    model.save(models_path + model_name)
+    model.save(str(models_path) + model_name)
     print('Saved model to disk!')
     # Get labels
     labels = train_generator.class_indices
