@@ -1,7 +1,6 @@
 import os
 import sys
 import random
-import cv2
 import time
 import shutil
 import pickle
@@ -23,20 +22,22 @@ import matplotlib.pyplot as plt
 def train(resf, context="bajoo"):
     if context == "bajoo":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
-        test_path = Path("/linux/glegat/datasets/ann_oil_data/test/oil")
+        test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
+        models_path = Path("/linux/glegat/code/oilspill/models")
         epochs = 2
-        batch_size = 64
-        train_samples = 5000  # 2 categories with 5000 images
+        batch_size = 128
+        train_samples = 1000  # 2 categories with 5000 images
         validation_samples = 500  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
+        models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/Sans titre/models")
         epochs = 2
         batch_size = 256
         train_samples = 500  # 2 categories with 5000 images
         validation_samples = 10  # 10 categories with 1000 images in each category
-    f = [x for x in test_path.rglob('*.png')]
-    print(f)
+    #f = [x for x in test_path.rglob('*.png')]
+    #print(f)
     img_width, img_height = 125, 130
     # Create a data generator for training
     # Making real time data augmentation
@@ -80,20 +81,10 @@ def train(resf, context="bajoo"):
     outputs = Dense(2, activation='softmax')(x)
     model = keras.Model(inputs, outputs)
 
-    # model.summary()
-
-    # freeze the VGG19 layer
-    # model.layers[1].trainable = False
-
     resf.write(str(model.summary()))
 
-    # model = keras.models.load_model('/content/models/VGG19_ep1_bs64_ts5000_vs500.h5')
-    #w_before = model.layers[4].get_weights()
-
     model.compile(optimizer='adam', loss='categorical_crossentropy')
-    # model.compile(optimizer = 'adam', loss=tf.keras.losses.CategoricalCrossentropy())
-    # model.compile(optimizer = 'adam', loss='mean_squared_error')
-    # model.compile(optimizer='sgd', loss=tf.keras.losses.MeanSquaredError())
+
     # in train : not is 4454 and oil : 792 -> class_weight
     model.fit(
         train_generator,
@@ -104,14 +95,10 @@ def train(resf, context="bajoo"):
         validation_steps=validation_samples // batch_size,
         epochs=epochs)
 
-    #w_after = model.layers[4].get_weights()
-    # print(w_before)
-    # print("##################################################################################################################")
-    # print(w_after)
     # Save model to disk
     model_name = 'VGG19_ep' + str(epochs) + '_bs' + str(batch_size) + '_ts' + str(train_samples) + '_vs' + str(
         validation_samples) + '.h5'
-    model.save('models/' + model_name)
+    model.save(models_path + model_name)
     print('Saved model to disk!')
     # Get labels
     labels = train_generator.class_indices

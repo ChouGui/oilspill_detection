@@ -22,6 +22,7 @@ def main():
     # Train a model
     model_name = train.train(resf, sys.argv[1])
     t2 = time.perf_counter()
+    resf.write(f"model name : {model_name}")
     resf.write(str(f"train computation time {t2 - t1:0.4f} seconds"))
     resf.close()
 
