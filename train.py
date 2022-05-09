@@ -13,31 +13,46 @@ from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activati
 from tensorflow.keras import optimizers
 from tensorflow.keras.applications import VGG19
 
-#from PIL import Image
+# from PIL import Image
 from pathlib import Path
-#import matplotlib.pyplot as plt
+
+
+# import matplotlib.pyplot as plt
+
+def create_model():
+    # lrr= ReduceLROnPlateau(monitor='val_acc', factor=.01, patience=3, min_lr=1e-5)
+    base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
+    # Weighting the classes because oilspill way less represented
+    # model.fit_generator(gen,class_weight=[1.5,0.5]) # gen?
+    inputs = keras.Input(shape=(125, 130, 1))
+    x = base_model(inputs, training=False)
+    x = Flatten()(x)
+    x = Dense(128, activation='relu')(x)
+    outputs = Dense(2, activation='softmax')(x)
+    model = keras.Model(inputs, outputs)
+    return model
 
 
 # Train a model
-def train(resf, context="bajoo"):
-    if context == "bajoo":  # if we are in bajoo config -> big running parameters
+def train(resf, context="bajoo", name=None):
+    if context == "bajoo" or context == "cassiopee":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
-        models_path = Path("/linux/glegat/code/oilspill/models")
-        epochs = 1
+        models_path = Path("/linux/glegat/code/oilspill/models/")
+        epochs = 2
         batch_size = 500
         train_samples = 1000  # 2 categories with 5000 images
         validation_samples = 500  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
-        models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/Sans titre/models")
-        epochs = 2
-        batch_size = 256
-        train_samples = 500  # 2 categories with 5000 images
-        validation_samples = 10  # 10 categories with 1000 images in each category
-    #f = [x for x in test_path.rglob('*.png')]
-    #print(f)
+        models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/oilspill/models")
+        epochs = 1
+        batch_size = 16
+        train_samples = 32  # 2 categories with 5000 images
+        validation_samples = 16  # 10 categories with 1000 images in each category
+    # f = [x for x in test_path.rglob('*.png')]
+    # print(f)
     img_width, img_height = 125, 130
     # Create a data generator for training
     # Making real time data augmentation
@@ -70,16 +85,8 @@ def train(resf, context="bajoo"):
         shuffle=True,
         class_mode='categorical')
     # print(validation_generator[0])
-    # lrr= ReduceLROnPlateau(monitor='val_acc', factor=.01, patience=3, min_lr=1e-5)
-    base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
-    # Weighting the classes because oilspill way less represented
-    # model.fit_generator(gen,class_weight=[1.5,0.5]) # gen?
-    inputs = keras.Input(shape=(125, 130, 1))
-    x = base_model(inputs, training=False)
-    x = Flatten()(x)
-    x = Dense(128, activation='relu')(x)
-    outputs = Dense(2, activation='softmax')(x)
-    model = keras.Model(inputs, outputs)
+
+    model = create_model()
 
     resf.write(str(model.summary()))
 
@@ -96,9 +103,12 @@ def train(resf, context="bajoo"):
         epochs=epochs)
 
     # Save model to disk
-    model_name = 'VGG19_ep' + str(epochs) + '_bs' + str(batch_size) + '_ts' + str(train_samples) + '_vs' + str(
-        validation_samples) + '.h5'
-    model.save(str(models_path) + model_name)
+    if name is None:
+        name = 'VGG19_ep' + str(epochs) + '_bs' + str(batch_size) + '_ts' + str(train_samples) + '_vs' + str(
+            validation_samples) + '.h5'
+    else:
+        name = name + '.h5'
+    model.save(str(models_path) + '/' + name)
     print('Saved model to disk!')
     # Get labels
     labels = train_generator.class_indices
@@ -110,4 +120,4 @@ def train(resf, context="bajoo"):
     with open('models/classes.pkl', 'wb') as file:
         pickle.dump(classes, file)
     print('Saved classes to disk!')
-    return model_name
+    return name

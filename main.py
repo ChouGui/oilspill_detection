@@ -1,21 +1,14 @@
 import os
 import sys
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
-#os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 # select a gpu
-#os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
-#os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import tensorflow as tf
-print("tf debugging set log device placement True")
-tf.debugging.set_log_device_placement(True)
+#print("tf debugging set log device placement True")
+#tf.debugging.set_log_device_placement(True)
 
 #from tensorflow.python.client import device_lib
-print("device lib list local devices")
 #print(device_lib.list_local_devices())
 
-print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-print("Num CPUs Available: ", len(tf.config.list_physical_devices('CPU')))
-print("Num Total Available ", len(tf.config.list_physical_devices()))
 import random
 # import cv2
 import time
@@ -34,19 +27,32 @@ import eval
 
 # The main entry point for this module
 def main():
+    argu = sys.argv[1:]
+    gpu = argu[0]
+    context = argu[1]
+    launch = argu[2]
+    name = None
+    if len(argu) > 3:
+        name = argu[3]
+    # selecting the good gpu
+    if context == "bajoo" or context == "cassiopee":
+        os.environ["CUDA_VISIBLE_DEVICES"] = gpu
+        print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
     t1 = time.perf_counter()
-    # resf = open("result.txt", 'w')
-    # # Train a model
-    # context = sys.argv[1]
-    # model_name = train.train(resf, context)
+    resf = open("result.txt", 'w')
+    # Train a model
+    if launch == "t" or launch == "tv":
+        train.train(resf, context, name)
     t2 = time.perf_counter()
     print(f"train computation time {t2 - t1:0.4f} seconds")
-    # resf.write(f"model name : {model_name}")
-    # resf.write(str(f"train computation time {t2 - t1:0.4f} seconds"))
-    # print("training done, launching evaluation :")
-    # eval.evaluateB(resf,context, model_name)
-    # print("evaluation done")
-    # resf.close()
+    resf.write(f"model name : {name}\n")
+    resf.write(str(f"train computation time {t2 - t1:0.4f} seconds"))
+    print("training done, launching evaluation :")
+    if launch == "v" or launch == "tv":
+        eval.evaluateB(resf, context, name)
+        print("evaluation done")
+    resf.close()
 
 
 # Tell python to run main method
