@@ -1,17 +1,21 @@
 import os
 import sys
-os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
+os.environ["CUDA_VISIBLE_DEVICES"]="2"
+#os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 # select a gpu
 #os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
 #os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import tensorflow as tf
+print("tf debugging set log device placement True")
 tf.debugging.set_log_device_placement(True)
 
-from tensorflow.python.client import device_lib
-print(device_lib.list_local_devices())
+#from tensorflow.python.client import device_lib
+print("device lib list local devices")
+#print(device_lib.list_local_devices())
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-
+print("Num CPUs Available: ", len(tf.config.list_physical_devices('CPU')))
+print("Num Total Available ", len(tf.config.list_physical_devices()))
 import random
 # import cv2
 import time

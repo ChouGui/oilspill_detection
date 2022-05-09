@@ -13,7 +13,7 @@ from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activati
 from tensorflow.keras import optimizers
 from tensorflow.keras.applications import VGG19
 
-from PIL import Image
+#from PIL import Image
 from pathlib import Path
 #import matplotlib.pyplot as plt
 
