@@ -35,7 +35,7 @@ def create_model():
 
 # Train a model
 def train(resf, context="bajoo", name=None):
-    with tf.devices('/GPU:1'):
+    #with tf.devices('/GPU:1'):
         if context == "bajoo" or context == "cassiopee":  # if we are in bajoo config -> big running parameters
             train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
             test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
@@ -87,8 +87,9 @@ def train(resf, context="bajoo", name=None):
             shuffle=True,
             class_mode='categorical')
         # print(validation_generator[0])
-
-        model = create_model()
+        strat = tf.distribute.OneDeviceStrategy(device='/gpu:1')
+        with strat.scope():
+            model = create_model()
 
         resf.write(str(model.summary()))
 
