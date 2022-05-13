@@ -40,9 +40,9 @@ def main():
     if context == "bajoo" or context == "cassiopee":
         with tf.device('/GPU:'+gpu):
             print("Num GPUs : ", len(tf.compat.v1.config.experimental.list_physical_devices('GPU')))
-            print(os.environ["CUDA_VISIBLE_DEVICES"])
+            #print(os.environ["CUDA_VISIBLE_DEVICES"])
             os.environ["CUDA_VISIBLE_DEVICES"] = gpu
-            print(os.environ["CUDA_VISIBLE_DEVICES"])
+            #print(os.environ["CUDA_VISIBLE_DEVICES"])
             print("Num GPUs after select : ", len(tf.compat.v1.config.experimental.list_physical_devices('GPU')))
             # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
             t1 = time.perf_counter()
