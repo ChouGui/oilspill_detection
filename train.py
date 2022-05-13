@@ -10,7 +10,7 @@ import tensorflow as tf
 from keras.engine.base_layer import Layer
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activation, Dropout
-from tensorflow.keras import optimizers
+from tensorflow.keras import optimizers, Input, Model
 from tensorflow.keras.applications import VGG19
 
 # from PIL import Image
@@ -24,12 +24,12 @@ def create_model():
     base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
     # Weighting the classes because oilspill way less represented
     # model.fit_generator(gen,class_weight=[1.5,0.5]) # gen?
-    inputs = keras.Input(shape=(125, 130, 1))
+    inputs = Input(shape=(125, 130, 1))
     x = base_model(inputs, training=False)
     x = Flatten()(x)
     x = Dense(128, activation='relu')(x)
     outputs = Dense(2, activation='softmax')(x)
-    model = keras.Model(inputs, outputs)
+    model = Model(inputs, outputs)
     return model
 
 
@@ -38,9 +38,9 @@ def train(resf, context="bajoo", name=None):
     if context == "bajoo" or context == "cassiopee":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
-        models_path = Path("/linux/glegat/code/oilspill/models/")
+        models_path = Path("/linux/glegat/code/oilspill_detection/models/")
         epochs = 2
-        batch_size = 500
+        batch_size = 32
         train_samples = 1000  # 2 categories with 5000 images
         validation_samples = 500  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
@@ -53,6 +53,7 @@ def train(resf, context="bajoo", name=None):
         validation_samples = 16  # 10 categories with 1000 images in each category
     # f = [x for x in test_path.rglob('*.png')]
     # print(f)
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     img_width, img_height = 125, 130
     # Create a data generator for training
     # Making real time data augmentation
