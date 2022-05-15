@@ -33,7 +33,7 @@ def evaluateB(resf, context="bajoo", name=None):
     if name is None:
         model = keras.models.load_model(str(models_path) + "test.h5")
     else:
-        model = keras.models.load_model(str(models_path) + '/' + name + '.h5')
+        model = keras.models.load_model(str(models_path) + '/' + name)
     # # Load classes
     # classes = {}
     # with open('models/classes.pkl', 'rb') as file:
@@ -65,7 +65,14 @@ def evaluateB(resf, context="bajoo", name=None):
         color_mode='grayscale',
         shuffle=True,
         class_mode='categorical')
-
     predictions = model.predict(test_generator, batch_size=batch_size, steps=steps)
+    resf.write("\n")
+    resf.write("#########################################\n")
+    resf.write("############## EVALUTATION ##############\n")
+    resf.write("#########################################\n")
+    resf.write("PREDICTION of a batch : ")
     resf.write(str(predictions))
-    print(predictions)
+    #print(test_generator.classes)
+    #print(predictions)
+    #print(len(test_generator.classes))
+    #print(len(predictions))
