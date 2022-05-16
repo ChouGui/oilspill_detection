@@ -36,12 +36,12 @@ def create_model():
 
 
 # Train a model
-def train(resf, context="bajoo", name=None):
-    if context == "bajoo" or context == "cassiopee":  # if we are in bajoo config -> big running parameters
+def train(resf, context="cass", name=None):
+    if context == "bajoo" or context == "cass":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
-        epochs = 2
+        epochs = 10
         batch_size = 32
         train_samples = 1000  # 2 categories with 5000 images
         validation_samples = 500  # 10 categories with 1000 images in each category
@@ -106,7 +106,7 @@ def train(resf, context="bajoo", name=None):
         validation_data=validation_generator,
         validation_steps=validation_samples // batch_size,
         epochs=epochs,
-        verbose=1,
+        verbose=0,
         callbacks=[csv_logger])
 
     # Save model to disk

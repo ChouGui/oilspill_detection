@@ -11,12 +11,12 @@ from pathlib import Path
 
 # Evaluate the model
 def evaluateB(resf, context="bajoo", name=None):
-    if context == "bajoo" or context == "cassiopee":  # if we are in bajoo config -> big running parameters
+    if context == "bajoo" or context == "cass":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
-        test_path = Path("/linux/glegat/datasets/ann_oil_data/test ")
-        models_path = Path("/linux/glegat/code/oilspill/models")
+        test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
+        models_path = Path("/linux/glegat/code/oilspill_detection/models")
         epochs = 2
-        batch_size = 64
+        batch_size = 32
         train_samples = 5000  # 2 categories with 5000 images
         validation_samples = 500  # 10 categories with 1000 images in each category
         steps = None
@@ -70,8 +70,10 @@ def evaluateB(resf, context="bajoo", name=None):
     resf.write("#########################################\n")
     resf.write("############## EVALUTATION ##############\n")
     resf.write("#########################################\n")
-    resf.write("PREDICTION of a batch : ")
+    resf.write("PREDICTION of a batch : \n")
     resf.write(str(predictions))
+    resf.write("\n")
+    #print(predictions)
     #print(test_generator.classes)
     #print(predictions)
     #print(len(test_generator.classes))
