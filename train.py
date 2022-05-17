@@ -11,7 +11,7 @@ from keras.engine.base_layer import Layer
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activation, Dropout
 from tensorflow.keras import optimizers, Input, Model
-from tensorflow.keras.applications import VGG19
+from tensorflow.keras.applications import VGG19, ResNet50
 from tensorflow.python.keras.callbacks import CSVLogger
 
 # from PIL import Image
@@ -23,7 +23,8 @@ from pathlib import Path
 
 def create_model():
     # lrr= ReduceLROnPlateau(monitor='val_acc', factor=.01, patience=3, min_lr=1e-5)
-    base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
+    #base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
+    base_model = ResNet50(weights=None, input_shape=(125, 130, 1), include_top=False)
     # Weighting the classes because oilspill way less represented
     # model.fit_generator(gen,class_weight=[1.5,0.5]) # gen?
     inputs = Input(shape=(125, 130, 1))
@@ -40,16 +41,18 @@ def train(resf, context="cass", name=None):
     if context == "bajoo" or context == "cass":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
+        test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
-        epochs = 10
+        epochs = 20
         batch_size = 32
         train_samples = 1000  # 2 categories with 5000 images
         validation_samples = 500  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
+        test2_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test2")
         models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/oilspill/models")
-        epochs = 1
+        epochs = 2
         batch_size = 16
         train_samples = 32  # 2 categories with 5000 images
         validation_samples = 16  # 10 categories with 1000 images in each category
@@ -81,7 +84,7 @@ def train(resf, context="cass", name=None):
     # Create a test generator
     validation_generator = validation_data_generator.flow_from_directory(
         # incorrect ici, je donne le test set en validation -> le test set ne doit être utilisé que après
-        str(train_path),
+        str(test2_path),
         target_size=(img_width, img_height),
         batch_size=batch_size,
         color_mode='grayscale',
@@ -95,7 +98,7 @@ def train(resf, context="cass", name=None):
 
     #model.summary()
 
-    model.compile(optimizer='adam', loss='categorical_crossentropy')
+    model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['acc'])
 
     # in train : not is 4454 and oil : 792 -> class_weight
     model.fit(
@@ -106,8 +109,17 @@ def train(resf, context="cass", name=None):
         validation_data=validation_generator,
         validation_steps=validation_samples // batch_size,
         epochs=epochs,
-        verbose=0,
+        verbose=2,
         callbacks=[csv_logger])
+
+    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size)
+    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size)
+    print(f"train loss - acc : {tr}")
+    print(f"valid loss - acc : {va}")
+    predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
+    predva = model.predict(validation_generator, batch_size=batch_size, steps=validation_samples // batch_size)
+    print(predtr)
+    print(predva)
 
     # Save model to disk
     if name is None:

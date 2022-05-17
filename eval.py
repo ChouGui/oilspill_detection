@@ -1,3 +1,4 @@
+import tensorflow as tf
 import keras
 import os
 import pickle
@@ -14,6 +15,7 @@ def evaluateB(resf, context="bajoo", name=None):
     if context == "bajoo" or context == "cass":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
+        test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models")
         epochs = 2
         batch_size = 32
@@ -23,6 +25,7 @@ def evaluateB(resf, context="bajoo", name=None):
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
+        test2_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test2")
         models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/oilspill/models")
         epochs = 1
         batch_size = 16
@@ -31,9 +34,9 @@ def evaluateB(resf, context="bajoo", name=None):
     # Load the model
     print(name)
     if name is None:
-        model = keras.models.load_model(str(models_path) + "test.h5")
+        model = tf.keras.models.load_model(str(models_path) + "test.h5")
     else:
-        model = keras.models.load_model(str(models_path) + '/' + name)
+        model = tf.keras.models.load_model(str(models_path) + '/' + name)
     # # Load classes
     # classes = {}
     # with open('models/classes.pkl', 'rb') as file:
@@ -52,14 +55,14 @@ def evaluateB(resf, context="bajoo", name=None):
 
     img_width, img_height = 125, 130
     # Create a data generator for validation
-    test_data_generator = keras.preprocessing.image.ImageDataGenerator(
+    test_data_generator = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1. / 255,
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True)
     # Create a test generator
     test_generator = test_data_generator.flow_from_directory(
-        str(test_path),
+        str(test2_path),
         target_size=(img_width, img_height),
         batch_size=batch_size,
         color_mode='grayscale',

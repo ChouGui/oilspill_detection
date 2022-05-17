@@ -5,3 +5,7 @@ __pycache__/train.cpython-37.pyc
 train.pyc
 __pycache__/eval.cpython-37.pyc
 env.txt
+models/*
+logs/log.csv
+models/classes.pkl
+result.txt

@@ -10,7 +10,7 @@ if context == "bajoo" or context == "cass":
     os.environ["CUDA_VISIBLE_DEVICES"] = argu[0]
 import warnings
 warnings.filterwarnings('ignore')
-os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
+#os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 import tensorflow as tf
 import random
 import time
