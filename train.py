@@ -45,8 +45,8 @@ def train(resf, context="cass", name=None):
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
         epochs = 20
         batch_size = 32
-        train_samples = 1000  # 2 categories with 5000 images
-        validation_samples = 500  # 10 categories with 1000 images in each category
+        train_samples = 5248  # 2 categories with 5000 images
+        validation_samples = 518  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
@@ -62,13 +62,13 @@ def train(resf, context="cass", name=None):
     img_width, img_height = 125, 130
     # Create a data generator for training
     # Making real time data augmentation
-    train_data_generator = keras.preprocessing.image.ImageDataGenerator(
+    train_data_generator = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1. / 255,
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True)
     # Create a data generator for validation
-    validation_data_generator = keras.preprocessing.image.ImageDataGenerator(
+    validation_data_generator = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1. / 255,
         shear_range=0.2,
         zoom_range=0.2,
@@ -92,7 +92,7 @@ def train(resf, context="cass", name=None):
         class_mode='categorical')
     # print(validation_generator[0])
 
-    csv_logger = CSVLogger('logs/log.csv', append=False, separator=';')
+    csv_logger = CSVLogger('result/log.csv', append=False, separator=';')
 
     model = create_model()
 
@@ -106,14 +106,14 @@ def train(resf, context="cass", name=None):
         class_weight={0: 0.15, 1: 0.85},
         # Weighting the classes because oilspill way less represented (0 is not and 1 is oilspill)
         steps_per_epoch=train_samples // batch_size,
-        validation_data=validation_generator,
-        validation_steps=validation_samples // batch_size,
+        #validation_data=validation_generator,
+        #validation_steps=validation_samples // batch_size,
         epochs=epochs,
         verbose=2,
         callbacks=[csv_logger])
 
-    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size)
-    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size)
+    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size, callbacks=[csv_logger])
+    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size, callbacks=[csv_logger])
     print(f"train loss - acc : {tr}")
     print(f"valid loss - acc : {va}")
     predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)

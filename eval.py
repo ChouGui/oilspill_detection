@@ -19,8 +19,8 @@ def evaluateB(resf, context="bajoo", name=None):
         models_path = Path("/linux/glegat/code/oilspill_detection/models")
         epochs = 2
         batch_size = 32
-        train_samples = 5000  # 2 categories with 5000 images
-        validation_samples = 500  # 10 categories with 1000 images in each category
+        train_samples = 5248  # 2 categories with 5000 images
+        validation_samples = 518  # 10 categories with 1000 images in each category
         steps = None
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")

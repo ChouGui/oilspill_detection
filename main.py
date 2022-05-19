@@ -21,7 +21,7 @@ import eval
 
 # The main entry point for this module
 def main():
-    resf = open("result.txt", 'w')
+    resf = open("result/result.txt", 'w')
 
     # Train a model
     if launch == "t" or launch == "tv":
