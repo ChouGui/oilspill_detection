@@ -8,4 +8,8 @@ env.txt
 models/*
 logs/log.csv
 models/classes.pkl
-result.txt
+result/result.txt
+done
+ML_miss4.py
+resplot.jpg
+ML_miss4.py

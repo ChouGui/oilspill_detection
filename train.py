@@ -43,10 +43,10 @@ def train(resf, context="cass", name=None):
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
         test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
-        epochs = 20
+        epochs = 100
         batch_size = 32
-        train_samples = 5248  # 2 categories with 5000 images
-        validation_samples = 518  # 10 categories with 1000 images in each category
+        train_samples = 5246  # 2 categories with 5000 images
+        validation_samples = 516  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
@@ -101,7 +101,7 @@ def train(resf, context="cass", name=None):
     model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['acc'])
 
     # in train : not is 4454 and oil : 792 -> class_weight
-    model.fit(
+    history = model.fit(
         train_generator,
         class_weight={0: 0.15, 1: 0.85},
         # Weighting the classes because oilspill way less represented (0 is not and 1 is oilspill)
@@ -110,7 +110,14 @@ def train(resf, context="cass", name=None):
         #validation_steps=validation_samples // batch_size,
         epochs=epochs,
         verbose=2,
-        callbacks=[csv_logger])
+        callbacks=[
+            tf.keras.callbacks.LearningRateScheduler(
+                lambda epoch: 1e-3 * 10 ** (epoch / 30)
+            )
+        ])
+        #callbacks=[csv_logger])
+    print(history)
+
 
     tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size, callbacks=[csv_logger])
     va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size, callbacks=[csv_logger])
@@ -118,8 +125,8 @@ def train(resf, context="cass", name=None):
     print(f"valid loss - acc : {va}")
     predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
     predva = model.predict(validation_generator, batch_size=batch_size, steps=validation_samples // batch_size)
-    print(predtr)
-    print(predva)
+    #print(predtr)
+    #print(predva)
 
     # Save model to disk
     if name is None:
@@ -137,4 +144,4 @@ def train(resf, context="cass", name=None):
     with open('models/classes.pkl', 'wb') as file:
         pickle.dump(classes, file)
     #print('Saved classes to disk!')
-    return name
+    return name,history

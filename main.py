@@ -17,16 +17,19 @@ import time
 
 import train
 import eval
+import plotRes
 
 
 # The main entry point for this module
 def main():
     resf = open("result/result.txt", 'w')
+    os.system("rm done")
 
     # Train a model
     if launch == "t" or launch == "tv":
         t1 = time.perf_counter()
-        train.train(resf, context, name)
+        _, histo = train.train(resf, context, name)
+        plotRes.plotRes(histo)
         t2 = time.perf_counter()
         resf.write(f"Trained model name : {name}\n")
         #print(f"train computation time {t2 - t1:0.2f} seconds")
@@ -35,6 +38,7 @@ def main():
         eval.evaluateB(resf, context, name)
         #print("evaluation done")
     resf.close()
+    os.system("touch done")
 
 
 # Tell python to run main method
