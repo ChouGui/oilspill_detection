@@ -110,12 +110,8 @@ def train(resf, context="cass", name=None, epochs=10):
         #validation_steps=validation_samples // batch_size,
         epochs=epochs,
         verbose=2,
-        callbacks=[
-            tf.keras.callbacks.LearningRateScheduler(
-                lambda epoch: 1e-3 * 10 ** (epoch / 30)
-            )
-        ])
-        #callbacks=[csv_logger])
+        callbacks=[csv_logger])
+        # callbacks=[tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-3 * 10 ** (epoch / 30))])
     print(history)
 
 
@@ -124,7 +120,19 @@ def train(resf, context="cass", name=None, epochs=10):
     print(f"train loss - acc : {tr}")
     print(f"valid loss - acc : {va}")
     predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
+    # convert array into dataframe
+    #DF = pd.DataFrame(arr)
+    # save the dataframe as a csv file
+    #DF.to_csv("data1.csv")
     predva = model.predict(validation_generator, batch_size=batch_size, steps=validation_samples // batch_size)
+    predf = open("result/predict.txt", 'w')
+    predf.write("PRINT PREDICTION OF TRAIN :\n")
+    for p in predtr:
+        predf.write(str(p)+"\n")
+    predf.write("PRINT PREDICTION OF VALIDATION :\n")
+    for p in predva:
+        predf.write(str(p)+"\n")
+    predf.close()
     #print(predtr)
     #print(predva)
 

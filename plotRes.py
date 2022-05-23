@@ -25,11 +25,7 @@ def plotRes(histo, ep):
         histo.history['acc'],
         label='Accuracy', lw=3
     )
-    plt.plot(
-        np.arange(1, ep+1),
-        histo.history['lr'],
-        label='Learning rate', color='pink', lw=3, linestyle='--'
-    )
+    #plt.plot(np.arange(1, ep+1),histo.history['lr'],label='Learning rate', color='pink', lw=3, linestyle='--')
     plt.title('Evaluation metrics', size=20)
     plt.xlabel('Epoch', size=14)
     plt.ylim(top=1)
