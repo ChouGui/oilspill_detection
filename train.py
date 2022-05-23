@@ -44,7 +44,7 @@ def train(resf, context="cass", name=None, epochs=10):
         test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
         #epochs = 100
-        batch_size = 32
+        batch_size = 1
         train_samples = 5246  # 2 categories with 5000 images
         validation_samples = 516  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
@@ -99,15 +99,15 @@ def train(resf, context="cass", name=None, epochs=10):
     #model.summary()
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), loss='categorical_crossentropy',metrics=['acc'])
-    print(train_generator)
+    #print(train_generator)
     #print(train_generator[0])
-    a = train_generator[0] # taille 2
-    print(len(a[0])) # 16
-    print(len(a[1])) # 16
-    b = a[0]
-    print(len(b[0]))
-    print(b[0])
-    print(len(b[0][0][0]))
+    #a = train_generator[0] # taille 2
+    #print(len(a[0])) # 16
+    #print(len(a[1])) # 16
+    #b = a[0]
+    #print(len(b[0]))
+    #print(b[0])
+    #print(len(b[0][0][0]))
 
     #for i in train_generator:
 
@@ -138,11 +138,11 @@ def train(resf, context="cass", name=None, epochs=10):
     predva = model.predict(validation_generator, batch_size=batch_size, steps=validation_samples // batch_size)
     predf = open("result/predict.txt", 'w')
     predf.write("PRINT PREDICTION OF TRAIN :\n")
-    for p in predtr:
-        predf.write(str(p)+"\n")
+    for i in range(10):
+        predf.write(str(predtr[i])+"\n")
     predf.write("PRINT PREDICTION OF VALIDATION :\n")
-    for p in predva:
-        predf.write(str(p)+"\n")
+    for i in range(10):
+        predf.write(str(predva[i])+"\n")
     predf.close()
     print(predtr)
     print(predva)
