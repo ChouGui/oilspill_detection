@@ -25,6 +25,7 @@ import plotRes
 def main():
     with open('result//error.txt', 'a') as errorf:
         try:
+            print(f"RUN : CONTEXT {context} - EP - {epochs} - NAME - {name}")
             resf = open("result/result.txt", 'w')
             os.system("rm done")
 
@@ -42,7 +43,6 @@ def main():
                 # print("evaluation done")
             resf.close()
             os.system("touch done")
-            raise ValueError("Some error occurred")
         except Exception as e:
             e_type, e_val, e_tb = sys.exc_info()
             traceback.print_exception(e_type, e_val, e_tb, file=errorf)

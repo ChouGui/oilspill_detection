@@ -24,7 +24,7 @@ from pathlib import Path
 def create_model():
     # lrr= ReduceLROnPlateau(monitor='val_acc', factor=.01, patience=3, min_lr=1e-5)
     base_model = VGG16(weights=None, input_shape=(125, 130, 1), include_top=False)
-    #base_model = ResNet50(weights=None, input_shape=(125, 130, 1), include_top=False)
+    # base_model = ResNet50(weights=None, input_shape=(125, 130, 1), include_top=False)
     # Weighting the classes because oilspill way less represented
     # model.fit_generator(gen,class_weight=[1.5,0.5]) # gen?
     inputs = Input(shape=(125, 130, 1))
@@ -43,8 +43,8 @@ def train(resf, context="cass", name=None, epochs=10):
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
         test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
-        #epochs = 100
-        batch_size = 1
+        # epochs = 100
+        batch_size = 2
         train_samples = 5246  # 2 categories with 5000 images
         validation_samples = 516  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
@@ -52,7 +52,7 @@ def train(resf, context="cass", name=None, epochs=10):
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
         test2_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test2")
         models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/oilspill/models")
-        #epochs = 2
+        # epochs = 2
         batch_size = 16
         train_samples = 32  # 2 categories with 5000 images
         validation_samples = 16  # 10 categories with 1000 images in each category
@@ -64,14 +64,14 @@ def train(resf, context="cass", name=None, epochs=10):
     # Making real time data augmentation
     train_data_generator = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1. / 255,
-        shear_range=0.2,
-        zoom_range=0.2,
+        #shear_range=0.2,
+        #zoom_range=0.2,
         horizontal_flip=True)
     # Create a data generator for validation
     validation_data_generator = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1. / 255,
-        shear_range=0.2,
-        zoom_range=0.2,
+        #shear_range=0.2,
+        #zoom_range=0.2,
         horizontal_flip=True)
     # Create a train generator
     train_generator = train_data_generator.flow_from_directory(
@@ -96,53 +96,69 @@ def train(resf, context="cass", name=None, epochs=10):
 
     model = create_model()
 
-    #model.summary()
+    # model.summary()
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), loss='categorical_crossentropy',metrics=['acc'])
-    #print(train_generator)
-    #print(train_generator[0])
-    #a = train_generator[0] # taille 2
-    #print(len(a[0])) # 16
-    #print(len(a[1])) # 16
-    #b = a[0]
-    #print(len(b[0]))
-    #print(b[0])
-    #print(len(b[0][0][0]))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), loss='categorical_crossentropy',
+                  metrics=['acc'])
+    # print(train_generator)
+    # print(train_generator[0])
+    #a0 = train_generator[0]  # taille 2
+    #a1 = train_generator[1]
+    #print(a0[len(a0) - 1])
+    # print(len(a[0])) # 16
+    # print(len(a[1])) # 16
+    # b = a[0]
+    # print(len(b[0]))
+    # print(b[0])
+    # print(len(b[0][0][0]))
+    print(len(validation_generator))
+    print(len(train_generator))
 
-    #for i in train_generator:
+    # LETS TRY TO FIND DE CLASSE OF TRAIN_GENERATOR
 
-        #print(len(i))
+    # for i in train_generator:
+    #raise ValueError("Stop here")
+    # print(len(i))
     # in train : not is 4454 and oil : 792 -> class_weight
+
     history = model.fit(
         train_generator,
         class_weight={0: 0.15, 1: 0.85},
         # Weighting the classes because oilspill way less represented (0 is not and 1 is oilspill)
         steps_per_epoch=train_samples // batch_size,
-        #validation_data=validation_generator,
-        #validation_steps=validation_samples // batch_size,
+        # validation_data=validation_generator,
+        # validation_steps=validation_samples // batch_size,
         epochs=epochs,
         verbose=2,
         callbacks=[csv_logger])
-        # callbacks=[tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-3 * 10 ** (epoch / 30))])
+    # callbacks=[tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-3 * 10 ** (epoch / 30))])
     print(history)
 
-    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size, verbose=2, callbacks=[csv_logger])
-    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size, verbose=2, callbacks=[csv_logger])
+    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size, verbose=2,
+                        callbacks=[csv_logger])
+    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size, verbose=2,
+                        callbacks=[csv_logger])
     print(f"train loss - acc : {tr}")
     print(f"valid loss - acc : {va}")
     predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
-    # convert array into dataframe
-    #DF = pd.DataFrame(arr)
-    # save the dataframe as a csv file
-    #DF.to_csv("data1.csv")
-    predva = model.predict(validation_generator, batch_size=batch_size, steps=validation_samples // batch_size)
     predf = open("result/predict.txt", 'w')
     predf.write("PRINT PREDICTION OF TRAIN :\n")
-    for i in range(10):
-        predf.write(str(predtr[i])+"\n")
-    predf.write("PRINT PREDICTION OF VALIDATION :\n")
-    for i in range(10):
-        predf.write(str(predva[i])+"\n")
+    trclass = train_generator.classes
+    predf.write(str(len(predtr)) + " - " + str(len(trclass)) + "\n")
+    for i in range(len(predtr)):
+       predf.write(str(predtr[i]) + " - "+str(trclass[i])+"\n")
+    predf.write("\n############## PRINT PREDICTION OF VALIDATION : ##############\n\n")
+    valclass = validation_generator.classes
+    predva = model.predict(validation_generator, batch_size=batch_size, steps=validation_samples // batch_size)
+    predf.write(str(len(predva)) + " - " + str(len(valclass)) + "\n")
+    for i in range(len(predva)):
+       predf.write(str(predva[i]) + " - "+str(valclass[i])+"\n")
+
+    #predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
+    # convert array into dataframe
+    # DF = pd.DataFrame(arr)
+    # save the dataframe as a csv file
+    # DF.to_csv("data1.csv")
     predf.close()
     print(predtr)
     print(predva)
@@ -152,7 +168,7 @@ def train(resf, context="cass", name=None, epochs=10):
         name = 'VGG19_ep' + str(epochs) + '_bs' + str(batch_size) + '_ts' + str(train_samples) + '_vs' + str(
             validation_samples) + '.h5'
     model.save(str(models_path) + '/' + name)
-    #print('Saved model to disk!')
+    # print('Saved model to disk!')
     # Get labels
     labels = train_generator.class_indices
     # Invert labels
@@ -162,5 +178,5 @@ def train(resf, context="cass", name=None, epochs=10):
     # Save classes to file
     with open('models/classes.pkl', 'wb') as file:
         pickle.dump(classes, file)
-    #print('Saved classes to disk!')
-    return name,history
+    # print('Saved classes to disk!')
+    return name, history
