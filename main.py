@@ -3,6 +3,7 @@ import sys
 argu = sys.argv[1:]
 context = argu[1]
 launch = argu[2]
+epochs = int(argu[4])
 name = None
 if len(argu) > 3:
     name = argu[3] + '.h5'
@@ -28,8 +29,8 @@ def main():
     # Train a model
     if launch == "t" or launch == "tv":
         t1 = time.perf_counter()
-        _, histo = train.train(resf, context, name)
-        plotRes.plotRes(histo)
+        _, histo = train.train(resf, context, name, epochs)
+        plotRes.plotRes(histo, epochs)
         t2 = time.perf_counter()
         resf.write(f"Trained model name : {name}\n")
         #print(f"train computation time {t2 - t1:0.2f} seconds")

@@ -37,13 +37,13 @@ def create_model():
 
 
 # Train a model
-def train(resf, context="cass", name=None):
+def train(resf, context="cass", name=None, epochs=10):
     if context == "bajoo" or context == "cass":  # if we are in bajoo config -> big running parameters
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test_path = Path("/linux/glegat/datasets/ann_oil_data/test")
         test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
-        epochs = 100
+        #epochs = 100
         batch_size = 32
         train_samples = 5246  # 2 categories with 5000 images
         validation_samples = 516  # 10 categories with 1000 images in each category
@@ -52,7 +52,7 @@ def train(resf, context="cass", name=None):
         test_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test")
         test2_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test2")
         models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/oilspill/models")
-        epochs = 2
+        #epochs = 2
         batch_size = 16
         train_samples = 32  # 2 categories with 5000 images
         validation_samples = 16  # 10 categories with 1000 images in each category
@@ -119,8 +119,8 @@ def train(resf, context="cass", name=None):
     print(history)
 
 
-    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size, callbacks=[csv_logger])
-    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size, callbacks=[csv_logger])
+    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size,verbose = 2, callbacks=[csv_logger])
+    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size,verbose = 2, callbacks=[csv_logger])
     print(f"train loss - acc : {tr}")
     print(f"valid loss - acc : {va}")
     predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
