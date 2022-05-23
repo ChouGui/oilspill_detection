@@ -11,7 +11,7 @@ from keras.engine.base_layer import Layer
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activation, Dropout
 from tensorflow.keras import optimizers, Input, Model
-from tensorflow.keras.applications import VGG19, ResNet50
+from tensorflow.keras.applications import VGG19, VGG16, ResNet50
 from tensorflow.python.keras.callbacks import CSVLogger
 
 # from PIL import Image
@@ -23,14 +23,14 @@ from pathlib import Path
 
 def create_model():
     # lrr= ReduceLROnPlateau(monitor='val_acc', factor=.01, patience=3, min_lr=1e-5)
-    #base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
-    base_model = ResNet50(weights=None, input_shape=(125, 130, 1), include_top=False)
+    base_model = VGG16(weights=None, input_shape=(125, 130, 1), include_top=False)
+    #base_model = ResNet50(weights=None, input_shape=(125, 130, 1), include_top=False)
     # Weighting the classes because oilspill way less represented
     # model.fit_generator(gen,class_weight=[1.5,0.5]) # gen?
     inputs = Input(shape=(125, 130, 1))
     x = base_model(inputs, training=False)
     x = Flatten()(x)
-    x = Dense(128, activation='relu')(x)
+    x = Dense(128, activation='tanh')(x)
     outputs = Dense(2, activation='softmax')(x)
     model = Model(inputs, outputs)
     return model
@@ -98,8 +98,20 @@ def train(resf, context="cass", name=None, epochs=10):
 
     #model.summary()
 
-    model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['acc'])
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), loss='categorical_crossentropy',metrics=['acc'])
+    print(train_generator)
+    #print(train_generator[0])
+    a = train_generator[0] # taille 2
+    print(len(a[0])) # 16
+    print(len(a[1])) # 16
+    b = a[0]
+    print(len(b[0]))
+    print(b[0])
+    print(len(b[0][0][0]))
 
+    #for i in train_generator:
+
+        #print(len(i))
     # in train : not is 4454 and oil : 792 -> class_weight
     history = model.fit(
         train_generator,
@@ -114,9 +126,8 @@ def train(resf, context="cass", name=None, epochs=10):
         # callbacks=[tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-3 * 10 ** (epoch / 30))])
     print(history)
 
-
-    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size,verbose = 2, callbacks=[csv_logger])
-    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size,verbose = 2, callbacks=[csv_logger])
+    tr = model.evaluate(train_generator, steps=train_samples // batch_size, batch_size=batch_size, verbose=2, callbacks=[csv_logger])
+    va = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size, verbose=2, callbacks=[csv_logger])
     print(f"train loss - acc : {tr}")
     print(f"valid loss - acc : {va}")
     predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
@@ -133,8 +144,8 @@ def train(resf, context="cass", name=None, epochs=10):
     for p in predva:
         predf.write(str(p)+"\n")
     predf.close()
-    #print(predtr)
-    #print(predva)
+    print(predtr)
+    print(predva)
 
     # Save model to disk
     if name is None:
