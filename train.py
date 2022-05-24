@@ -30,7 +30,8 @@ def create_model():
     inputs = Input(shape=(125, 130, 1))
     x = base_model(inputs, training=False)
     x = Flatten()(x)
-    x = Dense(128, activation='tanh')(x)
+    x = Dense(512, activation='relu')(x)
+    x = Dense(128, activation='relu')(x)
     outputs = Dense(2, activation='softmax')(x)
     model = Model(inputs, outputs)
     return model
@@ -44,7 +45,7 @@ def train(resf, context="cass", name=None, epochs=10):
         test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
         # epochs = 100
-        batch_size = 2
+        batch_size = 16
         train_samples = 5246  # 2 categories with 5000 images
         validation_samples = 516  # 10 categories with 1000 images in each category
     else:  # if we are on my computer -> small running parameters
@@ -88,7 +89,7 @@ def train(resf, context="cass", name=None, epochs=10):
         target_size=(img_width, img_height),
         batch_size=batch_size,
         color_mode='grayscale',
-        shuffle=True,
+        #shuffle=True,
         class_mode='categorical')
     # print(validation_generator[0])
 
@@ -96,9 +97,9 @@ def train(resf, context="cass", name=None, epochs=10):
 
     model = create_model()
 
-    # model.summary()
+    model.summary()
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), loss='categorical_crossentropy',
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), loss='categorical_crossentropy',
                   metrics=['acc'])
     # print(train_generator)
     # print(train_generator[0])
@@ -111,13 +112,13 @@ def train(resf, context="cass", name=None, epochs=10):
     # print(len(b[0]))
     # print(b[0])
     # print(len(b[0][0][0]))
-    print(len(validation_generator))
-    print(len(train_generator))
+    #print(len(validation_generator))
+    #print(len(train_generator))
 
     # LETS TRY TO FIND DE CLASSE OF TRAIN_GENERATOR
 
     # for i in train_generator:
-    #raise ValueError("Stop here")
+    raise ValueError("Stop here")
     # print(len(i))
     # in train : not is 4454 and oil : 792 -> class_weight
 
