@@ -30,6 +30,7 @@ def create_model():
     inputs = Input(shape=(125, 130, 1))
     x = base_model(inputs, training=False)
     x = Flatten()(x)
+    x = Dense(2048, activation='relu')(x)
     x = Dense(512, activation='relu')(x)
     x = Dense(128, activation='relu')(x)
     outputs = Dense(2, activation='softmax')(x)
@@ -97,9 +98,9 @@ def train(resf, context="cass", name=None, epochs=10):
 
     model = create_model()
 
-    model.summary()
+    #model.summary()
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), loss='categorical_crossentropy',
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001), loss='categorical_crossentropy',
                   metrics=['acc'])
     # print(train_generator)
     # print(train_generator[0])
@@ -118,7 +119,7 @@ def train(resf, context="cass", name=None, epochs=10):
     # LETS TRY TO FIND DE CLASSE OF TRAIN_GENERATOR
 
     # for i in train_generator:
-    raise ValueError("Stop here")
+    #raise ValueError("Stop here")
     # print(len(i))
     # in train : not is 4454 and oil : 792 -> class_weight
 
