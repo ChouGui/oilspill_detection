@@ -13,7 +13,7 @@ import train
 
 
 # Evaluate the model
-def evaluateB(context="cass", name="test", batch_size=16):
+def evaluateB(context="cass", gpus = 0, name="test", batch_size=16):
     train_path, test2_path, models_path, train_samples, validation_samples = train.get_context(context)
     # Load the model
     model = tf.keras.models.load_model(str(models_path) + '/' + name)
@@ -25,7 +25,7 @@ def evaluateB(context="cass", name="test", batch_size=16):
 
     predtr = model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size)
     predtest = model.predict(test_generator, batch_size=batch_size, steps=validation_samples // batch_size)
-    predf = open("result/predict.txt", 'w')
+    predf = open("result"+gpus+"/predict.txt", 'w')
     predf.write("\n")
     predf.write("#########################################\n")
     predf.write("############## EVALUTATION ##############\n")

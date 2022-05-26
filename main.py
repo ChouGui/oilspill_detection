@@ -46,7 +46,7 @@ def main():
     tracc = 0
     valacc = 0
 
-    with open('result//error.txt', 'a') as errorf:
+    with open('result'+gpus+'//error.txt', 'a') as errorf:
         try:
             print(f"RUN : | NAME - {name} | LAUNCH - {launch} | EPOCHS - {epochs} | BATCH SIZE - {batch_size}"
                   f" | LEARNING RATE - {lr} | COMMENTS - {comment}")
@@ -62,7 +62,7 @@ def main():
                 # in computation time {t2 - t1:0.2f} seconds")
                 print(str(f"train computation time {t2 - t1:0.2f} seconds\n"))
             if launch == "v" or launch == "tv":
-                eval.evaluateB(context, name, batch_size)
+                eval.evaluateB(context, gpus, name, batch_size)
                 # print("evaluation done")
 
             server = smtplib.SMTP('smtp.googlemail.com', 587)
