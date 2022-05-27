@@ -46,7 +46,7 @@ def main():
     tracc = 0
     valacc = 0
 
-    with open('result'+gpus+'//error.txt', 'a') as errorf:
+    with open('result//error.txt', 'a') as errorf:
         try:
             print(f"RUN : | NAME - {name} | LAUNCH - {launch} | EPOCHS - {epochs} | BATCH SIZE - {batch_size}"
                   f" | LEARNING RATE - {lr} | COMMENTS - {comment}")

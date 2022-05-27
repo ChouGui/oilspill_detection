@@ -78,8 +78,8 @@ def train(gpus="0", context="cass", name=None, epochs=10, batch_size=16, lr=0.00
     train_generator = get_generator(str(train_path), batch_size, True)
     validation_generator = get_generator(str(test2_path), batch_size, False)
 
-    os.system("rm result"+gpus+"/log.csv")
-    csv_logger = CSVLogger('result'+gpus+'/log.csv', append=False, separator=';')
+    os.system("rm result/log.csv")
+    csv_logger = CSVLogger('result/log.csv', append=False, separator=';')
 
     model = create_model()
     model.summary()
@@ -104,6 +104,10 @@ def train(gpus="0", context="cass", name=None, epochs=10, batch_size=16, lr=0.00
                    callbacks=[csv_logger])[1]
     valacc = model.evaluate(validation_generator, steps=validation_samples // batch_size, batch_size=batch_size, verbose=2,
                    callbacks=[csv_logger])[1]
+    print("Train prediction : ")
+    print(model.predict(train_generator, batch_size=batch_size, steps=train_samples // batch_size))
+    print("Valid prediction : ")
+    print(model.predict(validation_generator, batch_size=batch_size, steps=validation_samples // batch_size))
 
     model.save(str(models_path) + '/' + name)
     # Get labels

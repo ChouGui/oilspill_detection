@@ -6,10 +6,6 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
-def plot_csv():
-    a = 0
-    #path = Path("/Users/guillaume/Desktop/")
-
 def plotRes(histo, ep):
     rcParams['figure.figsize'] = (18, 8)
     rcParams['axes.spines.top'] = False
