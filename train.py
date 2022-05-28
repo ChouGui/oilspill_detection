@@ -56,8 +56,8 @@ def get_context(context="cass"):
         train_path = Path("/linux/glegat/datasets/ann_oil_data/train")
         test2_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
         models_path = Path("/linux/glegat/code/oilspill_detection/models/")
-        train_samples = 5246  # 2 categories with 5000 images
-        validation_samples = 516  # 10 categories with 1000 images in each category
+        train_samples = 5246  # 4454 + 792
+        validation_samples = 516  # 455 + 61
     else:  # if we are on my computer -> small running parameters
         train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/train")
         test2_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test2")

@@ -98,7 +98,7 @@ def main():
     passwd = 'wsocfhobvniljwyo'
     tracc = 0
     valacc = 0
-
+    create_test3()
     with open('result//error.txt', 'a') as errorf:
         try:
             print(f"RUN : | NAME - {name} | LAUNCH - {launch} | EPOCHS - {epochs} | BATCH SIZE - {batch_size}"
@@ -151,7 +151,6 @@ def main():
             e_type, e_val, e_tb = sys.exc_info()
             traceback.print_exception(e_type, e_val, e_tb, file=errorf)
         server.quit()
-
 
 # Tell python to run main method
 if __name__ == '__main__':

@@ -1,129 +1,120 @@
 import os
+import smtplib
 import sys
-import random
-import time
-import shutil
-import pickle
+import traceback
 
-import keras
-import tensorflow as tf
-from keras.engine.base_layer import Layer
-from tensorflow.keras.callbacks import ReduceLROnPlateau
-from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activation, Dropout
-from tensorflow.keras import optimizers, Input, Model
-from tensorflow.keras.applications import VGG19, VGG16, ResNet50
-from tensorflow.python.keras.callbacks import CSVLogger
-
-from pathlib import Path
-
-# PARAMETERS :
-models = ['resnet50','vgg19','vgg16']
-actis = ['relu','tanh']
-d1s = [0, 2048]
-d2s = [0, 512]
-d3s = [0, 128]
-
-shrs = [0.,0.1,0.2,0.3,0.4,0.5]
-zors = [0.,0.1,0.2,0.3,0.4,0.5]
-horfls = [True, False]
-verfls = [True, False]
-
-bss = [1,2,4,8,16,32]
-
-
-def cust_model(model="resnet50", d1=2048, d2=512, d3=128, acti='relu'):
-    # lrr= ReduceLROnPlateau(monitor='val_acc', factor=.01, patience=3, min_lr=1e-5)
-    if model == "resnet50":
-        base_model = ResNet50(weights=None, input_shape=(125, 130, 1), include_top=False)
-    elif model == "vgg19":
-        base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
-    else:
-        base_model = VGG16(weights=None, input_shape=(125, 130, 1), include_top=False)
-    inputs = Input(shape=(125, 130, 1))
-    x = base_model(inputs, training=False)
-    x = Flatten()(x)
-    if d1 != 0:
-        x = Dense(d1, activation=acti)(x)
-    if d2 != 0:
-        x = Dense(d2, activation=acti)(x)
-    if d3 != 0:
-        x = Dense(d3, activation=acti)(x)
-    outputs = Dense(2, activation='softmax')(x)
-    model = Model(inputs, outputs)
-    return model
-
-
-def get_generator(data_path, bs=16, shuffle=True, shr=0., zor=0., horfl=False, verfl=False):
-    img_width, img_height = 125, 130
-    # Create a data generator
-    data_generator = tf.keras.preprocessing.image.ImageDataGenerator(
-        rescale=1. / 255,
-        shear_range=shr,
-        zoom_range=zor,
-        horizontal_flip=horfl,
-        vertical_flip=verfl)
-    generator = data_generator.flow_from_directory(
-        str(data_path),
-        target_size=(img_width, img_height),
-        batch_size=bs,
-        color_mode='grayscale',
-        shuffle=shuffle,
-        class_mode='categorical')
-    return generator
-
-def get_context(context="cass"):
-    if context == "bajoo" or context == "cass" or context == "ping":
-        train_path = Path("/linux/glegat/datasets/ann_oil_data/test2")
-        test2_path = Path("/linux/glegat/datasets/ann_oil_data/test3")
-        models_path = Path("/linux/glegat/code/oilspill_detection/models/")
-        train_samples = 516  # 455 + 61 -> 11,82% or 88,18%
-        validation_samples = 258  # 228 + 30 -> 11,63% or 88,37%
-    else:  # if we are on my computer -> small running parameters
-        train_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test2")
-        test2_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/datasets/ann_oil_data/test3")
-        models_path = Path("/Users/guillaume/Desktop/UCL/Q100/Memoire/Cassiopee/oilspill/models")
-        train_samples = 32  # 2 categories with 5000 images
-        validation_samples = 16  # 10 categories with 1000 images in each category
-    return train_path, test2_path, models_path, train_samples, validation_samples
-
-
-def train(model):
-    acc = 0
-    return acc
-
-
-def run(gpus="0", context="cass", name=None, epochs=10, batch_size=16, lr=0.0001):
-    train_path, test2_path, models_path, train_samples, validation_samples = get_context(context)
+context = sys.argv[1]
+if context == "ping" or context == "cass":
+    gpus = sys.argv[2]
     os.environ["CUDA_VISIBLE_DEVICES"] = gpus
 
+import pandas as pd
+import tensorflow as tf
+
+import utils
+import params
+
+
+def run(xs, context="cass", epochs=10, batch_size=16, lr=0.0001):
+    train_path, test2_path, models_path, tsam, vsam = utils.get_context(context)
+    totruns = len(xs) * len(params.models) * params.nbrruns
     # Create generators for training and validation
     # Making real time data augmentation
-    train_generator = get_generator(str(train_path), batch_size, True)
-    validation_generator = get_generator(str(test2_path), batch_size, True)
+    # v6, v9, r50, r101, d121 = [], [], [], [], []
+    valmeans = [[], [], [], [], []]
+    accmeans = [[], [], [], [], []]
+    a = 0
+    for x in xs:  # XS IS LR
 
-    os.system("rm result/log.csv")
-    csv_logger = CSVLogger('result/log.csv', append=True, separator=';')
+        tgen = utils.get_generator(str(train_path), batch_size)
+        vgen = utils.get_generator(str(test2_path), batch_size)
 
-    model = cust_model(models[0],d1s[1],d2s[1],d3s[1],actis[0])
-    model.summary()
+        for m in range(len(params.models)):
+            accmean = 0
+            valmean = 0
+            for i in range(params.nbrruns):
+                print(f"({a}/{totruns}) : {x} - {params.models[m]} - [{i}/{params.nbrruns}]")
+                a += 1
+                model = utils.cust_model(params.models[m])
+                # model.summary()
+                model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=x), loss='categorical_crossentropy',
+                              metrics=['acc'])
+                # reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.01, patience=3, min_lr=0.001)
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr), loss='categorical_crossentropy',
-                  metrics=['acc'])
+                history = model.fit(
+                    tgen,
+                    # Weighting the classes because oilspill way less represented (0 is not and 1 is oilspill)
+                    class_weight={0: 0.12, 1: 0.88},
+                    steps_per_epoch=tsam // batch_size,
+                    batch_size=batch_size,
+                    validation_data=vgen,
+                    validation_steps=vsam // batch_size,
+                    epochs=epochs,
+                    verbose=0)  # ,
+                # callbacks=[reduce_lr])
 
-    history = model.fit(
-        train_generator,
-        # Weighting the classes because oilspill way less represented (0 is not and 1 is oilspill)
-        class_weight={0: 0.12, 1: 0.88},
-        steps_per_epoch=train_samples // batch_size,
-        batch_size=batch_size,
-        # validation_data=validation_generator,
-        # validation_steps=validation_samples // batch_size,
-        epochs=epochs,
-        verbose=2,
-        callbacks=[csv_logger])
+                acc = round(history.history['acc'][epochs - 1], 3)
+                valacc = round(history.history['val_acc'][epochs - 1], 3)
+                print(f"acc : {acc} - valacc : {valacc}")
+                valmean += valacc
+                accmean += acc
+            valmeans[m].append(round(valmean / params.nbrruns, 3))
+            accmeans[m].append(round(accmean / params.nbrruns, 3))
+        print(f"{x} just done")
+        print("accmeans")
+        print(accmeans)
+        print("valmeans")
+        print(valmeans)
+    # convert array into dataframe
+    accdf = pd.DataFrame(accmeans)
+    valdf = pd.dataFrame(valmeans)
+    # save the dataframe as a csv file
+    accdf.to_csv("mean/accmean.csv")
+    valdf.to_csv("mean/valmean.csv")
+    return accmeans, valmeans
 
-    tracc = model.evaluate(train_generator,verbose=2,callbacks=[csv_logger])[1]
-    valacc = model.evaluate(validation_generator,verbose=2,callbacks=[csv_logger])[1]
-    print(tracc)
-    print(valacc)
-    return history,tracc, valacc
+# The main entry point for this module
+def main():
+    with open('result//error.txt', 'a') as errorf:
+        try:
+            print(f"RUN : | NAME - {params.name} | EPOCHS - {params.epochs} | BATCH SIZE - {params.bs}"
+                  f" | LEARNING RATE - {params.lr} | COMMENTS - {params.comment}")
+            accmeans,valmeans = run(params.xs, context, params.epochs, params.bs, params.lr)
+            #plotmean(x,means,title = 'Evaluation of epochs',xlabel = 'Epoch')
+            utils.plotmean(params.xs,accmeans,params.name+"acc","Training Accuracy", params.xlabel)
+            utils.plotmean(params.xs,valmeans,params.name+"val","Validation Accuracy", params.xlabel)
+
+            # send a mail when finish
+            server = smtplib.SMTP('smtp.googlemail.com', 587)
+            server.ehlo()
+            server.starttls()
+            server.login(params.mail, params.passwd)
+            BODY = '\r\n'.join(['To: guillaume.legat@gmail.com',
+                                'From: guillaume.legat@gmail.com',
+                                'Subject: RUN FINISHED',
+                                '',
+                                f"Run ended without crash \n\n\tCONTEXT OF THE RUN : \nNAME \t\t| {params.name} \n"
+                                f"\nEPOCHS \t| {params.epochs} \nBATCH SIZE \t| {params.bs}  \nLEARN RATE \t| {params.lr} "
+                                f"\nCOMMENTS \t| {params.comment}\n XS \t\t| {params.xs}"])
+            server.sendmail(params.mail, [params.mail], BODY)
+            server.quit()
+        except Exception as e:
+            server = smtplib.SMTP('smtp.googlemail.com', 587)
+            server.ehlo()
+            server.starttls()
+            server.login(params.mail, params.passwd)
+            BODY = '\r\n'.join(['To: guillaume.legat@gmail.com',
+                                'From: guillaume.legat@gmail.com',
+                                'Subject: ERROR OCCURED',
+                                '',
+                                f"An error occured : {e} \n\n\tCONTEXT OF THE RUN : \nNAME \t\t| {params.name} \n"
+                                f"\nEPOCHS \t| {params.epochs} \nBATCH SIZE \t| {params.bs}  \nLEARN RATE \t| {params.lr} "
+                                f"\nCOMMENTS \t| {params.comment}\n XS \t\t| {params.xs}"])
+            server.sendmail(params.mail, [params.mail], BODY)
+            server.quit()
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=errorf)
+
+# Tell python to run main method
+if __name__ == '__main__':
+    main()
