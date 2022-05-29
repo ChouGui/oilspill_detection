@@ -23,7 +23,6 @@ if context == "ping" or context == "cass":
     os.environ["CUDA_VISIBLE_DEVICES"] = gpus
 
 import warnings
-
 warnings.filterwarnings('ignore')
 # os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 

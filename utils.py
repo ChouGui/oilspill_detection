@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.layers import Flatten, Dense, BatchNormalization, Activation, Dropout
 from tensorflow.keras import optimizers, Input, Model
-from tensorflow.keras.applications import VGG19, VGG16, ResNet50, ResNet101, DenseNet121
+from tensorflow.keras.applications import VGG19, VGG16, ResNet50, DenseNet121
 from tensorflow.python.keras.callbacks import CSVLogger
 
 from pathlib import Path
@@ -22,8 +22,8 @@ def cust_model(model="resnet50", d1=2048, d2=512, d3=128, acti='relu'):
         base_model = ResNet50(weights=None, input_shape=(125, 130, 1), include_top=False)
     elif model == "vgg19":
         base_model = VGG19(weights=None, input_shape=(125, 130, 1), include_top=False)
-    elif model == "resnet101":
-        base_model = ResNet101(weights=None, input_shape=(125, 130, 1), include_top=False)
+    #elif model == "resnet101":
+        #base_model = ResNet101(weights=None, input_shape=(125, 130, 1), include_top=False)
     elif model == "densenet121":
         base_model = DenseNet121(weights=None, input_shape=(125, 130, 1), include_top=False)
     else:
